@@ -27,6 +27,7 @@
         <label for="category-select">분류</label>
         <select id="category-select"></select>
         <button id="reset-category" type="button" class="secondary">처음 문제로</button>
+        <button id="review-only" type="button" class="secondary">복습 문제만 풀기</button>
       </section>
 
       <section class="trainer-grid">
@@ -56,10 +57,50 @@
 
           <div class="button-row">
             <button id="show-answer" type="button">답안 보기</button>
+            <button id="mark-first-try" type="button">한 번에 해결</button>
+            <button id="mark-review" type="button" class="secondary">복습 필요로 저장</button>
             <button id="next-puzzle" type="button" class="secondary">다음 문제</button>
             <a id="analysis-link" class="analysis-link" target="_blank" rel="noopener noreferrer">Chess.com에서 분석</a>
           </div>
         </article>
+      </section>
+
+      <section class="stats-panel" aria-labelledby="stats-title">
+        <div class="stats-heading">
+          <div>
+            <p class="eyebrow">Study Dashboard</p>
+            <h2 id="stats-title">학습 정리 창</h2>
+          </div>
+          <button id="reset-stats" type="button" class="secondary danger">기록 초기화</button>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span id="solved-count">0</span>
+            <small>해결한 문제</small>
+          </article>
+          <article class="stat-card">
+            <span id="recent-solved-date">없음</span>
+            <small>최근에 푼 날짜</small>
+          </article>
+          <article class="stat-card">
+            <span id="review-count">0</span>
+            <small>다시 풀 문제</small>
+          </article>
+        </div>
+
+        <div class="stats-columns">
+          <article class="review-list-card">
+            <h3>한 번에 해결하지 못한 문제</h3>
+            <p class="dashboard-help">답을 봤거나 복습 필요로 저장한 문제만 모아 다시 풀 수 있습니다.</p>
+            <div id="review-list" class="review-list"></div>
+          </article>
+
+          <article class="topic-rates-card">
+            <h3>주제별 성공률</h3>
+            <div id="topic-rates" class="topic-rates"></div>
+          </article>
+        </div>
       </section>
     </main>
 
