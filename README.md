@@ -12,7 +12,21 @@
 - FEN을 인코딩해 Chess.com 분석 보드로 여는 버튼
 - FEN 배치를 시각화하는 간단한 체스판 렌더러
 
-## 실행
+## 쉽게 접속하는 공개 사이트 주소
+
+이 저장소를 GitHub에 올리고 GitHub Pages가 활성화되면 아래 주소로 바로 접속할 수 있습니다.
+
+```text
+https://<깃허브아이디>.github.io/1001-exerccises/
+```
+
+예를 들어 GitHub 아이디가 `myname`이면 주소는 `https://myname.github.io/1001-exerccises/` 입니다.
+
+이 프로젝트에는 GitHub Pages 자동 배포 설정이 포함되어 있어서, `main` 또는 `work` 브랜치에 푸시되면 정적 사이트가 자동으로 배포됩니다. 로컬에서 `npm run serve`를 실행하지 않아도 됩니다.
+
+## 로컬에서 미리 보기
+
+공개 배포 전에 내 컴퓨터에서만 확인하고 싶을 때만 아래 명령을 사용합니다.
 
 ```bash
 npm run serve
