@@ -23,50 +23,57 @@
         </div>
       </section>
 
-      <section class="controls" aria-label="문제 분류 선택">
-        <label for="category-select">분류</label>
-        <select id="category-select"></select>
-        <button id="reset-category" type="button" class="secondary">처음 문제로</button>
-        <button id="review-only" type="button" class="secondary">복습 문제만 풀기</button>
+      <nav class="view-tabs" aria-label="화면 이동">
+        <button id="study-tab" type="button" class="active">학습</button>
+        <button id="summary-tab" type="button" class="secondary">정리</button>
+        <button id="review-tab" type="button" class="secondary">복습</button>
+      </nav>
+
+      <section id="study-view" class="app-view">
+        <section class="controls" aria-label="문제 분류 선택">
+          <label for="category-select">분류</label>
+          <select id="category-select"></select>
+          <button id="reset-category" type="button" class="secondary">처음 문제로</button>
+        </section>
+
+        <section class="trainer-grid">
+          <article class="board-card" aria-label="체스 보드">
+            <div id="board" class="board" role="img" aria-label="현재 전술 문제의 체스판"></div>
+            <p id="side-to-move" class="side-to-move"></p>
+          </article>
+
+          <article class="puzzle-card" aria-live="polite">
+            <div class="puzzle-meta">
+              <span id="puzzle-category" class="pill"></span>
+              <span id="puzzle-difficulty" class="pill muted"></span>
+            </div>
+            <h2 id="puzzle-title"></h2>
+            <p id="puzzle-goal" class="goal"></p>
+
+            <dl class="fen-block">
+              <dt>FEN</dt>
+              <dd id="puzzle-fen"></dd>
+            </dl>
+
+            <div id="answer-panel" class="answer-panel" hidden>
+              <h3>정답 수순</h3>
+              <ol id="answer-lines"></ol>
+              <p id="answer-note"></p>
+            </div>
+
+            <div class="button-row">
+              <button id="show-answer" type="button">답안 보기</button>
+              <button id="mark-first-try" type="button">해결 완료</button>
+              <button id="mark-review" type="button" class="secondary">복습 필요로 저장</button>
+              <button id="reset-current" type="button" class="secondary">이 문제 다시 풀기</button>
+              <button id="next-puzzle" type="button" class="secondary">다음 문제</button>
+              <a id="analysis-link" class="analysis-link" target="_blank" rel="noopener noreferrer">Chess.com에서 분석</a>
+            </div>
+          </article>
+        </section>
       </section>
 
-      <section class="trainer-grid">
-        <article class="board-card" aria-label="체스 보드">
-          <div id="board" class="board" role="img" aria-label="현재 전술 문제의 체스판"></div>
-          <p id="side-to-move" class="side-to-move"></p>
-        </article>
-
-        <article class="puzzle-card" aria-live="polite">
-          <div class="puzzle-meta">
-            <span id="puzzle-category" class="pill"></span>
-            <span id="puzzle-difficulty" class="pill muted"></span>
-          </div>
-          <h2 id="puzzle-title"></h2>
-          <p id="puzzle-goal" class="goal"></p>
-
-          <dl class="fen-block">
-            <dt>FEN</dt>
-            <dd id="puzzle-fen"></dd>
-          </dl>
-
-          <div id="answer-panel" class="answer-panel" hidden>
-            <h3>정답 수순</h3>
-            <ol id="answer-lines"></ol>
-            <p id="answer-note"></p>
-          </div>
-
-          <div class="button-row">
-            <button id="show-answer" type="button">답안 보기</button>
-            <button id="mark-first-try" type="button">한 번에 해결</button>
-            <button id="mark-review" type="button" class="secondary">복습 필요로 저장</button>
-            <button id="reset-current" type="button" class="secondary">이 문제 다시 풀기</button>
-            <button id="next-puzzle" type="button" class="secondary">다음 문제</button>
-            <a id="analysis-link" class="analysis-link" target="_blank" rel="noopener noreferrer">Chess.com에서 분석</a>
-          </div>
-        </article>
-      </section>
-
-      <section class="stats-panel" aria-labelledby="stats-title">
+      <section id="summary-view" class="app-view stats-panel" aria-labelledby="stats-title" hidden>
         <div class="stats-heading">
           <div>
             <p class="eyebrow">Study Dashboard</p>
@@ -97,17 +104,27 @@
             <div id="solved-list" class="numbered-puzzle-list"></div>
           </article>
 
-          <article class="review-list-card">
-            <h3>복습해야 하는 문제 번호 목록</h3>
-            <p class="dashboard-help">답을 봤거나 복습 필요로 저장한 문제만 모아 다시 풀 수 있습니다.</p>
-            <div id="review-list" class="numbered-puzzle-list"></div>
-          </article>
-
           <article class="topic-rates-card">
             <h3>주제별 성공률과 최근 풀이 날짜</h3>
             <div id="topic-rates" class="topic-rates"></div>
           </article>
         </div>
+      </section>
+
+      <section id="review-view" class="app-view stats-panel" aria-labelledby="review-title" hidden>
+        <div class="stats-heading">
+          <div>
+            <p class="eyebrow">Review Queue</p>
+            <h2 id="review-title">복습 창</h2>
+          </div>
+          <button id="start-review-session" type="button">복습 대상만 공부하기</button>
+        </div>
+
+        <article class="review-list-card full-width-card">
+          <h3>복습해야 하는 문제 번호 목록</h3>
+          <p class="dashboard-help">“복습 필요로 저장” 버튼을 누른 문제만 여기에 들어옵니다. 답안 보기만으로는 자동 저장되지 않습니다.</p>
+          <div id="review-list" class="numbered-puzzle-list"></div>
+        </article>
       </section>
     </main>
 

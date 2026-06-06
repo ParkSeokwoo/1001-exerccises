@@ -10,7 +10,12 @@ const REVIEW_CATEGORY = '복습 문제';
 
 const categorySelect = document.querySelector('#category-select');
 const resetCategory = document.querySelector('#reset-category');
-const reviewOnly = document.querySelector('#review-only');
+const studyTab = document.querySelector('#study-tab');
+const summaryTab = document.querySelector('#summary-tab');
+const reviewTab = document.querySelector('#review-tab');
+const studyView = document.querySelector('#study-view');
+const summaryView = document.querySelector('#summary-view');
+const reviewView = document.querySelector('#review-view');
 const board = document.querySelector('#board');
 const progressCount = document.querySelector('#progress-count');
 const sideToMove = document.querySelector('#side-to-move');
@@ -35,8 +40,9 @@ const solvedList = document.querySelector('#solved-list');
 const reviewList = document.querySelector('#review-list');
 const topicRates = document.querySelector('#topic-rates');
 const resetStats = document.querySelector('#reset-stats');
+const startReviewSession = document.querySelector('#start-review-session');
 
-const categories = ['전체', REVIEW_CATEGORY, ...new Set(puzzles.map((puzzle) => puzzle.category))];
+const categories = ['전체', ...new Set(puzzles.map((puzzle) => puzzle.category))];
 let currentCategory = categories[0];
 let currentIndex = 0;
 let answerWasViewed = false;
@@ -116,6 +122,34 @@ function renderCategoryOptions() {
     .join('');
 }
 
+function selectCategoryOption(category) {
+  if (![...categorySelect.options].some((option) => option.value === category)) {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    categorySelect.append(option);
+  }
+
+  categorySelect.value = category;
+}
+
+function showView(viewName) {
+  const isStudy = viewName === 'study';
+  const isSummary = viewName === 'summary';
+  const isReview = viewName === 'review';
+
+  studyView.hidden = !isStudy;
+  summaryView.hidden = !isSummary;
+  reviewView.hidden = !isReview;
+  studyTab.classList.toggle('active', isStudy);
+  summaryTab.classList.toggle('active', isSummary);
+  reviewTab.classList.toggle('active', isReview);
+  studyTab.classList.toggle('secondary', !isStudy);
+  summaryTab.classList.toggle('secondary', !isSummary);
+  reviewTab.classList.toggle('secondary', !isReview);
+  renderDashboard();
+}
+
 function renderBoard(fen) {
   const [placement] = fen.split(' ');
   const squares = [];
@@ -153,11 +187,11 @@ function createSquare(piece, rankIndex, fileIndex) {
 function renderEmptyReviewState() {
   board.innerHTML = '<div class="empty-board-message">복습할 문제가 없습니다</div>';
   progressCount.textContent = '0 / 0';
-  sideToMove.textContent = '한 번에 해결하지 못한 문제를 저장하면 여기에 모입니다.';
+  sideToMove.textContent = '복습 필요로 저장한 문제가 여기에 모입니다.';
   puzzleCategory.textContent = REVIEW_CATEGORY;
   puzzleDifficulty.textContent = '완료';
   puzzleTitle.textContent = '복습할 문제가 없습니다';
-  puzzleGoal.textContent = '문제를 풀다가 답안을 먼저 봤거나, 복습 필요로 저장하면 이 분류에서 다시 풀 수 있습니다.';
+  puzzleGoal.textContent = '문제 화면에서 복습 필요로 저장한 문제만 이 창에서 다시 풀 수 있습니다.';
   puzzleFen.textContent = '-';
   analysisLink.removeAttribute('href');
   answerPanel.hidden = true;
@@ -216,7 +250,7 @@ function recordPuzzleResult({ solvedFirstTry }) {
     attempts: record.attempts + 1,
     firstTrySolves: record.firstTrySolves + (solvedFirstTry ? 1 : 0),
     solved: true,
-    needsReview: !solvedFirstTry,
+    needsReview: false,
     lastSolvedAt: solvedAt
   };
 
@@ -233,7 +267,7 @@ function resetCurrentPuzzleRecord() {
   delete studyRecords[puzzle.id];
   saveStudyRecords();
   currentCategory = puzzle.category;
-  categorySelect.value = puzzle.category;
+  selectCategoryOption(puzzle.category);
   currentIndex = Math.max(0, getVisiblePuzzles().findIndex((candidate) => candidate.id === puzzle.id));
   renderPuzzle();
 }
@@ -273,10 +307,11 @@ function openPuzzleById(puzzleId, targetCategory = null) {
   }
 
   currentCategory = targetCategory ?? (getRecord(puzzle.id).needsReview ? REVIEW_CATEGORY : puzzle.category);
-  categorySelect.value = currentCategory;
+  selectCategoryOption(currentCategory);
   const visiblePuzzles = getVisiblePuzzles();
   currentIndex = Math.max(0, visiblePuzzles.findIndex((candidate) => candidate.id === puzzle.id));
   renderPuzzle();
+  showView('study');
   document.querySelector('.trainer-grid').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -294,6 +329,7 @@ function renderDashboard() {
   solvedCount.textContent = `${solvedPuzzles.length} / ${puzzles.length}`;
   recentSolvedDate.textContent = formatDate(lastSolvedAt);
   reviewCount.textContent = reviewPuzzles.length;
+  startReviewSession.disabled = reviewPuzzles.length === 0;
   renderSolvedList(solvedPuzzles);
   renderReviewList(reviewPuzzles);
   renderTopicRates();
@@ -312,7 +348,7 @@ function renderReviewList(reviewPuzzles) {
   renderNumberedPuzzleList({
     container: reviewList,
     puzzlesToRender: reviewPuzzles,
-    emptyText: '아직 다시 풀 문제가 없습니다. 답을 본 문제는 자동으로 여기에 저장됩니다.',
+    emptyText: '아직 복습할 문제가 없습니다. 문제 화면에서 “복습 필요로 저장”을 누른 문제만 여기에 저장됩니다.',
     targetCategory: () => REVIEW_CATEGORY
   });
 }
@@ -394,13 +430,11 @@ categorySelect.addEventListener('change', (event) => {
 });
 
 resetCategory.addEventListener('click', () => {
-  currentIndex = 0;
-  renderPuzzle();
-});
+  if (currentCategory === REVIEW_CATEGORY) {
+    currentCategory = '전체';
+    selectCategoryOption(currentCategory);
+  }
 
-reviewOnly.addEventListener('click', () => {
-  currentCategory = REVIEW_CATEGORY;
-  categorySelect.value = REVIEW_CATEGORY;
   currentIndex = 0;
   renderPuzzle();
 });
@@ -424,7 +458,21 @@ resetStats.addEventListener('click', () => {
   saveStudyRecords();
   currentIndex = 0;
   renderPuzzle();
+  renderDashboard();
+});
+
+studyTab.addEventListener('click', () => showView('study'));
+summaryTab.addEventListener('click', () => showView('summary'));
+reviewTab.addEventListener('click', () => showView('review'));
+
+startReviewSession.addEventListener('click', () => {
+  currentCategory = REVIEW_CATEGORY;
+  selectCategoryOption(REVIEW_CATEGORY);
+  currentIndex = 0;
+  renderPuzzle();
+  showView('study');
 });
 
 renderCategoryOptions();
 renderPuzzle();
+showView('study');

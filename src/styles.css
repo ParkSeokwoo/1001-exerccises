@@ -522,3 +522,27 @@ button.danger {
   color: var(--muted);
   font-weight: 700;
 }
+
+.view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.view-tabs button.active {
+  background: var(--accent);
+  color: #07140e;
+}
+
+.app-view[hidden] {
+  display: none !important;
+}
+
+.full-width-card {
+  width: 100%;
+}
+
+#review-view .review-list-card {
+  margin-top: 1rem;
+}
