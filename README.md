@@ -33,7 +33,18 @@ Actions에서 아래 오류가 나오면 저장소의 GitHub Pages가 아직 활
 Get Pages site failed. Please verify that the repository has Pages enabled and configured to build using GitHub Actions
 ```
 
-이 프로젝트의 workflow는 `actions/configure-pages`에 `enablement: true`를 지정해 Pages 사이트 생성을 자동으로 시도합니다. 그래도 실패하면 GitHub 저장소에서 `Settings` → `Pages` → `Build and deployment` → `Source`를 `GitHub Actions`로 직접 바꾼 뒤 Actions를 다시 실행하세요.
+또는 아래 오류가 나오면 Actions 토큰이 Pages 사이트를 새로 만들 권한이 없다는 뜻입니다. 이 경우 workflow에서 자동으로 해결할 수 없고, 저장소 소유자가 GitHub 화면에서 Pages를 한 번 켜야 합니다.
+
+```text
+Create Pages site failed. Error: Resource not accessible by integration
+```
+
+해결 순서:
+
+1. GitHub 저장소에서 `Settings` → `Pages`로 이동합니다.
+2. `Build and deployment`의 `Source`를 `GitHub Actions`로 바꿉니다.
+3. `Actions` 탭으로 돌아가 `Deploy static chess tactics site to GitHub Pages` workflow를 다시 실행합니다.
+4. 성공하면 `https://parkseokwoo.github.io/1001-exerccises/` 주소로 접속합니다.
 
 ## 로컬에서 미리 보기
 
