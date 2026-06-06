@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1001 체스 전술 트레이너</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">1001 Exercises · Tactical Study</p>
+          <h1 id="page-title">체스 전술 문제집을 웹에서 풀어보세요</h1>
+          <p class="hero-copy">
+            테마별로 분류된 전술 문제를 선택하고, 답안을 숨긴 채 고민한 다음,
+            FEN으로 바로 Chess.com 분석 보드에서 이어서 검토할 수 있습니다.
+          </p>
+        </div>
+        <div class="hero-card" aria-label="학습 진행 현황">
+          <span id="progress-count">0 / 0</span>
+          <small>현재 분류의 진행도</small>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="문제 분류 선택">
+        <label for="category-select">분류</label>
+        <select id="category-select"></select>
+        <button id="reset-category" type="button" class="secondary">처음 문제로</button>
+        <button id="review-only" type="button" class="secondary">복습 문제만 풀기</button>
+      </section>
+
+      <section class="trainer-grid">
+        <article class="board-card" aria-label="체스 보드">
+          <div id="board" class="board" role="img" aria-label="현재 전술 문제의 체스판"></div>
+          <p id="side-to-move" class="side-to-move"></p>
+        </article>
+
+        <article class="puzzle-card" aria-live="polite">
+          <div class="puzzle-meta">
+            <span id="puzzle-category" class="pill"></span>
+            <span id="puzzle-difficulty" class="pill muted"></span>
+          </div>
+          <h2 id="puzzle-title"></h2>
+          <p id="puzzle-goal" class="goal"></p>
+
+          <dl class="fen-block">
+            <dt>FEN</dt>
+            <dd id="puzzle-fen"></dd>
+          </dl>
+
+          <div id="answer-panel" class="answer-panel" hidden>
+            <h3>정답 수순</h3>
+            <ol id="answer-lines"></ol>
+            <p id="answer-note"></p>
+          </div>
+
+          <div class="button-row">
+            <button id="show-answer" type="button">답안 보기</button>
+            <button id="mark-first-try" type="button">한 번에 해결</button>
+            <button id="mark-review" type="button" class="secondary">복습 필요로 저장</button>
+            <button id="reset-current" type="button" class="secondary">이 문제 다시 풀기</button>
+            <button id="next-puzzle" type="button" class="secondary">다음 문제</button>
+            <a id="analysis-link" class="analysis-link" target="_blank" rel="noopener noreferrer">Chess.com에서 분석</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="stats-panel" aria-labelledby="stats-title">
+        <div class="stats-heading">
+          <div>
+            <p class="eyebrow">Study Dashboard</p>
+            <h2 id="stats-title">학습 정리 창</h2>
+          </div>
+          <button id="reset-stats" type="button" class="secondary danger">기록 초기화</button>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span id="solved-count">0</span>
+            <small>해결한 문제</small>
+          </article>
+          <article class="stat-card">
+            <span id="recent-solved-date">없음</span>
+            <small>최근에 푼 날짜(전체)</small>
+          </article>
+          <article class="stat-card">
+            <span id="review-count">0</span>
+            <small>다시 풀 문제</small>
+          </article>
+        </div>
+
+        <div class="stats-columns">
+          <article class="solved-list-card">
+            <h3>푼 문제 번호 목록</h3>
+            <p class="dashboard-help">번호를 누르면 그 문제로 바로 이동합니다. 다시 풀려면 문제 화면의 “이 문제 다시 풀기”를 누르세요.</p>
+            <div id="solved-list" class="numbered-puzzle-list"></div>
+          </article>
+
+          <article class="review-list-card">
+            <h3>복습해야 하는 문제 번호 목록</h3>
+            <p class="dashboard-help">답을 봤거나 복습 필요로 저장한 문제만 모아 다시 풀 수 있습니다.</p>
+            <div id="review-list" class="numbered-puzzle-list"></div>
+          </article>
+
+          <article class="topic-rates-card">
+            <h3>주제별 성공률과 최근 풀이 날짜</h3>
+            <div id="topic-rates" class="topic-rates"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "1001-exercises-chess-tactics",
+  "version": "1.0.0",
+  "description": "Korean chess tactics trainer with categorized puzzles, FEN positions, and Chess.com analysis links.",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/validate-puzzles.js",
+    "serve": "python3 -m http.server 4173"
+  },
+  "devDependencies": {}
+}
