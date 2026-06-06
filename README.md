@@ -24,6 +24,17 @@ https://<깃허브아이디>.github.io/1001-exerccises/
 
 이 프로젝트에는 GitHub Pages 자동 배포 설정이 포함되어 있어서, `main` 또는 `work` 브랜치에 푸시되면 정적 사이트가 자동으로 배포됩니다. 로컬에서 `npm run serve`를 실행하지 않아도 됩니다.
 
+
+## GitHub Pages 오류 해결
+
+Actions에서 아래 오류가 나오면 저장소의 GitHub Pages가 아직 활성화되지 않은 상태입니다.
+
+```text
+Get Pages site failed. Please verify that the repository has Pages enabled and configured to build using GitHub Actions
+```
+
+이 프로젝트의 workflow는 `actions/configure-pages`에 `enablement: true`를 지정해 Pages 사이트 생성을 자동으로 시도합니다. 그래도 실패하면 GitHub 저장소에서 `Settings` → `Pages` → `Build and deployment` → `Source`를 `GitHub Actions`로 직접 바꾼 뒤 Actions를 다시 실행하세요.
+
 ## 로컬에서 미리 보기
 
 공개 배포 전에 내 컴퓨터에서만 확인하고 싶을 때만 아래 명령을 사용합니다.
