@@ -25,11 +25,13 @@ const answerNote = document.querySelector('#answer-note');
 const showAnswer = document.querySelector('#show-answer');
 const markFirstTry = document.querySelector('#mark-first-try');
 const markReview = document.querySelector('#mark-review');
+const resetCurrent = document.querySelector('#reset-current');
 const nextPuzzle = document.querySelector('#next-puzzle');
 const analysisLink = document.querySelector('#analysis-link');
 const solvedCount = document.querySelector('#solved-count');
 const recentSolvedDate = document.querySelector('#recent-solved-date');
 const reviewCount = document.querySelector('#review-count');
+const solvedList = document.querySelector('#solved-list');
 const reviewList = document.querySelector('#review-list');
 const topicRates = document.querySelector('#topic-rates');
 const resetStats = document.querySelector('#reset-stats');
@@ -162,6 +164,7 @@ function renderEmptyReviewState() {
   showAnswer.disabled = true;
   markFirstTry.disabled = true;
   markReview.disabled = true;
+  resetCurrent.disabled = true;
   nextPuzzle.disabled = true;
 }
 
@@ -191,6 +194,7 @@ function renderPuzzle() {
   showAnswer.disabled = false;
   markFirstTry.disabled = false;
   markReview.disabled = false;
+  resetCurrent.disabled = false;
   nextPuzzle.disabled = false;
   showAnswer.textContent = '답안 보기';
   answerWasViewed = false;
@@ -217,6 +221,20 @@ function recordPuzzleResult({ solvedFirstTry }) {
   };
 
   setRecord(puzzle.id, nextRecord);
+  renderPuzzle();
+}
+
+function resetCurrentPuzzleRecord() {
+  const puzzle = getCurrentPuzzle();
+  if (!puzzle) {
+    return;
+  }
+
+  delete studyRecords[puzzle.id];
+  saveStudyRecords();
+  currentCategory = puzzle.category;
+  categorySelect.value = puzzle.category;
+  currentIndex = Math.max(0, getVisiblePuzzles().findIndex((candidate) => candidate.id === puzzle.id));
   renderPuzzle();
 }
 
@@ -248,16 +266,16 @@ function moveToNextPuzzle() {
   renderPuzzle();
 }
 
-function openPuzzleById(puzzleId) {
+function openPuzzleById(puzzleId, targetCategory = null) {
   const puzzle = puzzles.find((candidate) => candidate.id === puzzleId);
   if (!puzzle) {
     return;
   }
 
-  currentCategory = REVIEW_CATEGORY;
-  categorySelect.value = REVIEW_CATEGORY;
-  const reviewPuzzles = getVisiblePuzzles();
-  currentIndex = Math.max(0, reviewPuzzles.findIndex((candidate) => candidate.id === puzzle.id));
+  currentCategory = targetCategory ?? (getRecord(puzzle.id).needsReview ? REVIEW_CATEGORY : puzzle.category);
+  categorySelect.value = currentCategory;
+  const visiblePuzzles = getVisiblePuzzles();
+  currentIndex = Math.max(0, visiblePuzzles.findIndex((candidate) => candidate.id === puzzle.id));
   renderPuzzle();
   document.querySelector('.trainer-grid').scrollIntoView({ behavior: 'smooth' });
 }
@@ -265,6 +283,7 @@ function openPuzzleById(puzzleId) {
 function renderDashboard() {
   const records = Object.entries(studyRecords);
   const solvedRecords = records.filter(([, record]) => record.solved);
+  const solvedPuzzles = puzzles.filter((puzzle) => getRecord(puzzle.id).solved);
   const reviewPuzzles = puzzles.filter((puzzle) => getRecord(puzzle.id).needsReview);
   const lastSolvedAt = solvedRecords
     .map(([, record]) => record.lastSolvedAt)
@@ -272,38 +291,64 @@ function renderDashboard() {
     .sort()
     .at(-1);
 
-  solvedCount.textContent = `${solvedRecords.length} / ${puzzles.length}`;
+  solvedCount.textContent = `${solvedPuzzles.length} / ${puzzles.length}`;
   recentSolvedDate.textContent = formatDate(lastSolvedAt);
   reviewCount.textContent = reviewPuzzles.length;
+  renderSolvedList(solvedPuzzles);
   renderReviewList(reviewPuzzles);
   renderTopicRates();
 }
 
-function renderReviewList(reviewPuzzles) {
-  reviewList.innerHTML = '';
+function renderSolvedList(solvedPuzzles) {
+  renderNumberedPuzzleList({
+    container: solvedList,
+    puzzlesToRender: solvedPuzzles,
+    emptyText: '아직 푼 문제가 없습니다. 한 번에 해결 또는 답안 확인 후 해결을 누르면 여기에 저장됩니다.',
+    targetCategory: (puzzle) => puzzle.category
+  });
+}
 
-  if (reviewPuzzles.length === 0) {
+function renderReviewList(reviewPuzzles) {
+  renderNumberedPuzzleList({
+    container: reviewList,
+    puzzlesToRender: reviewPuzzles,
+    emptyText: '아직 다시 풀 문제가 없습니다. 답을 본 문제는 자동으로 여기에 저장됩니다.',
+    targetCategory: () => REVIEW_CATEGORY
+  });
+}
+
+function renderNumberedPuzzleList({ container, puzzlesToRender, emptyText, targetCategory }) {
+  container.innerHTML = '';
+
+  if (puzzlesToRender.length === 0) {
     const emptyMessage = document.createElement('p');
     emptyMessage.className = 'empty-state';
-    emptyMessage.textContent = '아직 다시 풀 문제가 없습니다. 답을 본 문제는 자동으로 여기에 저장됩니다.';
-    reviewList.append(emptyMessage);
+    emptyMessage.textContent = emptyText;
+    container.append(emptyMessage);
     return;
   }
 
-  reviewPuzzles.forEach((puzzle) => {
+  puzzlesToRender.forEach((puzzle) => {
     const record = getRecord(puzzle.id);
+    const originalNumber = puzzles.findIndex((candidate) => candidate.id === puzzle.id) + 1;
     const item = document.createElement('button');
     item.type = 'button';
-    item.className = 'review-item';
-    item.addEventListener('click', () => openPuzzleById(puzzle.id));
+    item.className = 'numbered-puzzle-item';
+    item.addEventListener('click', () => openPuzzleById(puzzle.id, targetCategory(puzzle)));
 
+    const number = document.createElement('span');
+    number.className = 'puzzle-number';
+    number.textContent = originalNumber;
+    const text = document.createElement('span');
+    text.className = 'puzzle-list-text';
     const title = document.createElement('strong');
     title.textContent = puzzle.title;
     const meta = document.createElement('small');
-    meta.textContent = `${puzzle.category} · 시도 ${record.attempts}회`;
+    meta.textContent = `${puzzle.category} · 시도 ${record.attempts}회 · 최근 ${formatDate(record.lastSolvedAt)}`;
 
-    item.append(title, meta);
-    reviewList.append(item);
+    text.append(title, meta);
+    item.append(number, text);
+    container.append(item);
   });
 }
 
@@ -315,13 +360,18 @@ function renderTopicRates() {
     const attempts = categoryPuzzles.reduce((sum, puzzle) => sum + getRecord(puzzle.id).attempts, 0);
     const firstTrySolves = categoryPuzzles.reduce((sum, puzzle) => sum + getRecord(puzzle.id).firstTrySolves, 0);
     const rate = attempts === 0 ? 0 : Math.round((firstTrySolves / attempts) * 100);
+    const latestSolvedAt = categoryPuzzles
+      .map((puzzle) => getRecord(puzzle.id).lastSolvedAt)
+      .filter(Boolean)
+      .sort()
+      .at(-1);
 
     const row = document.createElement('div');
     row.className = 'topic-rate-row';
 
     const label = document.createElement('div');
     label.className = 'topic-rate-label';
-    label.innerHTML = `<strong>${category}</strong><span>${firstTrySolves}/${attempts} 성공</span>`;
+    label.innerHTML = `<strong>${category}</strong><span>${firstTrySolves}/${attempts} 성공 · 최근 ${formatDate(latestSolvedAt)}</span>`;
 
     const meter = document.createElement('div');
     meter.className = 'topic-meter';
@@ -366,6 +416,7 @@ markFirstTry.addEventListener('click', () => {
 });
 
 markReview.addEventListener('click', markCurrentPuzzleForReview);
+resetCurrent.addEventListener('click', resetCurrentPuzzleRecord);
 nextPuzzle.addEventListener('click', moveToNextPuzzle);
 
 resetStats.addEventListener('click', () => {

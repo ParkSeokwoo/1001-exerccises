@@ -59,6 +59,7 @@
             <button id="show-answer" type="button">답안 보기</button>
             <button id="mark-first-try" type="button">한 번에 해결</button>
             <button id="mark-review" type="button" class="secondary">복습 필요로 저장</button>
+            <button id="reset-current" type="button" class="secondary">이 문제 다시 풀기</button>
             <button id="next-puzzle" type="button" class="secondary">다음 문제</button>
             <a id="analysis-link" class="analysis-link" target="_blank" rel="noopener noreferrer">Chess.com에서 분석</a>
           </div>
@@ -81,7 +82,7 @@
           </article>
           <article class="stat-card">
             <span id="recent-solved-date">없음</span>
-            <small>최근에 푼 날짜</small>
+            <small>최근에 푼 날짜(전체)</small>
           </article>
           <article class="stat-card">
             <span id="review-count">0</span>
@@ -90,14 +91,20 @@
         </div>
 
         <div class="stats-columns">
+          <article class="solved-list-card">
+            <h3>푼 문제 번호 목록</h3>
+            <p class="dashboard-help">번호를 누르면 그 문제로 바로 이동합니다. 다시 풀려면 문제 화면의 “이 문제 다시 풀기”를 누르세요.</p>
+            <div id="solved-list" class="numbered-puzzle-list"></div>
+          </article>
+
           <article class="review-list-card">
-            <h3>한 번에 해결하지 못한 문제</h3>
+            <h3>복습해야 하는 문제 번호 목록</h3>
             <p class="dashboard-help">답을 봤거나 복습 필요로 저장한 문제만 모아 다시 풀 수 있습니다.</p>
-            <div id="review-list" class="review-list"></div>
+            <div id="review-list" class="numbered-puzzle-list"></div>
           </article>
 
           <article class="topic-rates-card">
-            <h3>주제별 성공률</h3>
+            <h3>주제별 성공률과 최근 풀이 날짜</h3>
             <div id="topic-rates" class="topic-rates"></div>
           </article>
         </div>
