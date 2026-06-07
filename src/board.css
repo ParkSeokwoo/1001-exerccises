@@ -1,4 +1,4 @@
-/* cache-bust: 20260607-deploy3 */
+/* cache-bust: 20260607-pieces-direct1 */
 .board {
   container-type: inline-size;
   grid-template-columns: repeat(8, minmax(0, 1fr));
@@ -14,23 +14,25 @@
 .piece {
   display: block;
   max-width: 100%;
-  font-size: clamp(1.75rem, 9cqw, 3.35rem);
+  font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
+  font-size: clamp(1.95rem, 9.4cqw, 3.55rem);
+  font-weight: 900;
   line-height: 1;
-  transform: translateY(-0.02em);
+  transform: translateY(-0.025em);
 }
 
 .piece.white-piece {
-  color: #f8fafc;
-  -webkit-text-stroke: 1.1px #050814;
+  color: #ffffff;
+  -webkit-text-stroke: 1.35px #ffffff;
   paint-order: stroke fill;
-  text-shadow: 0 1px 0 #050814, 0 0 4px rgba(5, 8, 20, 0.78);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 
 .piece.black-piece {
-  color: #020617;
-  -webkit-text-stroke: 0.75px #dbe6f6;
+  color: #000000;
+  -webkit-text-stroke: 1.35px #000000;
   paint-order: stroke fill;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 3px rgba(255, 255, 255, 0.35);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.34);
 }
 
 .square small {
@@ -40,12 +42,12 @@
   overflow: hidden;
   font-size: clamp(0.48rem, 1.65cqw, 0.66rem);
   line-height: 1;
-  opacity: 0.82;
+  opacity: 0.78;
 }
 
 @media (max-width: 520px) {
   .piece {
-    font-size: clamp(1.35rem, 8.5cqw, 2.65rem);
+    font-size: clamp(1.45rem, 8.8cqw, 2.78rem);
   }
 
   .square small {
