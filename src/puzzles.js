@@ -1,82 +1,102 @@
 export const puzzles = [
   {
-    id: 'pin-001',
-    category: '핀과 압박',
+    id: 'mate-in-1-001',
+    category: '메이트 인 1',
     difficulty: '초급',
-    title: '고정된 나이트를 공격하기',
-    goal: '백 차례입니다. f6 나이트가 핀에 걸린 약점을 이용해 결정적인 전술을 찾으세요.',
-    fen: 'r2q1rk1/ppp2ppp/2n2n2/3p4/3P2b1/2N1PN2/PPQ2PPP/R1B2RK1 w - - 0 1',
-    answer: ['1. Ne5! challenges the pinned defender and increases pressure.', 'If Black trades, White recaptures and keeps the initiative against the weakened center.'],
-    note: '핀에 걸린 말은 실제 방어력이 낮습니다. 먼저 압박을 추가한 뒤 구조를 열어 이득을 확정합니다.'
+    title: '메이트 인 1 - 1번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: 'kr6/1p6/p7/4b3/8/8/1P4BP/R6K w - - 0 1',
+    answer: ['1. Rxa6#'],
+    note: '룩이 a파일의 방해물을 제거하면서 a8의 흑 왕을 직접 공격합니다.'
   },
   {
-    id: 'fork-001',
-    category: '포크',
+    id: 'mate-in-1-002',
+    category: '메이트 인 1',
     difficulty: '초급',
-    title: '나이트 포크로 룩 획득',
-    goal: '백 차례입니다. 나이트가 왕과 룩을 동시에 공격할 수 있는 칸을 찾으세요.',
-    fen: '2r3k1/8/8/3N4/8/8/5PPP/6K1 w - - 0 1',
-    answer: ['1. Ne7+! forks the king on g8 and the rook on c8.', 'After the king moves, 2. Nxc8 wins the rook.'],
-    note: '나이트 포크는 서로 떨어진 두 목표를 동시에 때릴 때 강력합니다. 체크가 포함되면 상대는 먼저 왕을 움직여야 합니다.'
+    title: '메이트 인 1 - 2번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: 'r2B3k/5p1p/8/8/8/b7/7P/K5R1 w - - 0 1',
+    answer: ['1. Bf6#'],
+    note: '비숍이 f6으로 이동해 h8 왕을 대각선으로 공격하고, 룩이 탈출 칸을 막습니다.'
   },
   {
-    id: 'mate-001',
-    category: '체크메이트',
+    id: 'mate-in-1-003',
+    category: '메이트 인 1',
+    difficulty: '초급',
+    title: '메이트 인 1 - 3번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: '8/R6p/4pkp1/3rN3/3P3P/6P1/2n3K1/8 w - - 0 1',
+    answer: ['1. Rf7#'],
+    note: '룩이 7랭크에서 f파일로 들어가고 나이트가 룩을 보호합니다.'
+  },
+  {
+    id: 'mate-in-1-004',
+    category: '메이트 인 1',
+    difficulty: '초급',
+    title: '메이트 인 1 - 4번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: '7k/2r1n1p1/4Bp2/3P4/5Kp1/6P1/2p2PP1/R7 w - - 0 1',
+    answer: ['1. Rh1#'],
+    note: '룩이 h파일을 장악하고, 비숍이 g8 탈출 칸을 통제합니다.'
+  },
+  {
+    id: 'mate-in-1-005',
+    category: '메이트 인 1',
+    difficulty: '확인 필요',
+    title: '메이트 인 1 - 5번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: '1k1r4/1bnr4/3P1p2/6p1/7p/8/6PP/RR5K w - - 0 1',
+    answer: ['FEN 확인 필요: 현재 입력된 위치에서는 명확한 1수 메이트 수가 보이지 않습니다.'],
+    note: '가능성이 있어 보이는 체크 수들은 흑 왕의 캡처나 방어가 남습니다. 원본 FEN을 다시 확인하세요.'
+  },
+  {
+    id: 'mate-in-1-006',
+    category: '메이트 인 1',
+    difficulty: '초급',
+    title: '메이트 인 1 - 6번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: 'r6R/ppk1b3/2p1P3/P7/3N4/4q3/6PP/2R4K w - - 0 1',
+    answer: ['1. Rxc6#'],
+    note: '룩이 c6의 방해물을 제거하면서 c파일로 왕을 공격합니다. d4 나이트가 c6을 지켜 줍니다.'
+  },
+  {
+    id: 'mate-in-1-007',
+    category: '메이트 인 1',
     difficulty: '중급',
-    title: '후방 약점을 찌르는 메이트',
-    goal: '백 차례입니다. 흑 왕 주변의 탈출 칸이 막혀 있습니다. 메이트 수순을 찾으세요.',
-    fen: '6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1',
-    answer: ['1. Re8#'],
-    note: '왕 뒤쪽 랭크가 폰으로 막혀 있으면 룩 침투 한 수가 바로 메이트가 될 수 있습니다.'
+    title: '메이트 인 1 - 7번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: '2rrk1n1/1nQ1p2N/pB5p/6p1/qP3p2/2P4P/P3BPP1/3R2K1 w - - 0 1',
+    answer: ['1. Bh5#'],
+    note: '비숍이 h5로 이동해 e8 왕을 대각선으로 공격합니다. 주변 기물들이 탈출 칸을 막고 있습니다.'
   },
   {
-    id: 'discovery-001',
-    category: '디스커버드 어택',
-    difficulty: '중급',
-    title: '비숍 라인을 열어 퀸 공격',
-    goal: '백 차례입니다. 말을 움직여 숨겨진 비숍의 공격선을 열어보세요.',
-    fen: 'r2q1rk1/pp3ppp/2n1bn2/3p4/3P4/2N1PN2/PPQB1PPP/R4RK1 w - - 0 1',
-    answer: ['1. Ng5! attacks e6 and uncovers pressure on h7.', 'If 1... Qd7, 2. Nxe6 wins after the discovered pressure.'],
-    note: '디스커버드 어택은 움직이는 말도 위협을 만들고, 뒤의 말도 동시에 공격에 참여하게 만드는 전술입니다.'
+    id: 'mate-in-1-008',
+    category: '메이트 인 1',
+    difficulty: '초급',
+    title: '메이트 인 1 - 8번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: '8/P7/2b1n3/2bk1N2/5P2/3P2Pp/4P2P/7K w - - 0 1',
+    answer: ['1. Ne7#'],
+    note: '나이트가 e7로 이동해 d5 왕을 공격하고 주변 칸을 동시에 통제합니다.'
   },
   {
-    id: 'skewer-001',
-    category: '스큐어',
-    difficulty: '중급',
-    title: '킹 뒤의 룩을 겨냥하기',
-    goal: '백 차례입니다. 먼저 더 가치 있는 말을 공격해 뒤의 기물을 얻는 수를 찾으세요.',
-    fen: '2q5/3k4/8/8/6B1/8/8/6K1 w - - 0 1',
-    answer: ['1. Bg4+! skewers the king on d7 to the queen on c8.', 'After the king moves, 2. Bxc8+ wins the queen.'],
-    note: '스큐어는 강한 기물을 먼저 공격해 이동을 강제하고, 그 뒤에 놓인 기물을 잡는 전술입니다.'
+    id: 'mate-in-1-009',
+    category: '메이트 인 1',
+    difficulty: '초급',
+    title: '메이트 인 1 - 9번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: '6kb/p3p2p/5P1B/4Nn2/8/8/7P/R6K w - - 0 1',
+    answer: ['1. f7#'],
+    note: 'f폰이 전진해 g8 왕을 공격하고, 비숍과 나이트가 탈출 칸을 통제합니다.'
   },
   {
-    id: 'sacrifice-001',
-    category: '희생 공격',
-    difficulty: '고급',
-    title: '왕 앞 폰 구조 파괴',
-    goal: '백 차례입니다. 흑 왕의 방어 폰을 깨뜨리는 희생 수를 고려해보세요.',
-    fen: 'r4rk1/ppp2ppp/2n2n2/3p4/3P2b1/2N1PN2/PPQB1PPP/R4RK1 w - - 0 1',
-    answer: ['1. Bxh7+! Kxh7', '2. Ng5+ Kg8', '3. Qh7# or decisive attack depending on the defense.'],
-    note: '희생 전술은 후속 체크와 주요 기물의 합류가 있을 때만 강력합니다. Chess.com 분석 버튼으로 변화를 확인해보세요.'
-  },
-  {
-    id: 'deflection-001',
-    category: '디플렉션',
-    difficulty: '고급',
-    title: '수비자를 끌어내기',
-    goal: '백 차례입니다. 핵심 방어 기물을 다른 임무로 유도해 킹을 노출시키세요.',
-    fen: '4r1k1/5ppp/8/8/8/8/5PPP/4RQK1 w - - 0 1',
-    answer: ['1. Rxe8+! Qxe8 is impossible because there is no queen defender.', 'After the rook is deflected, White controls the e-file and wins the attack.'],
-    note: '디플렉션은 방어자의 위치나 역할을 바꿔 원래 지키던 약점을 무너뜨리는 전술입니다.'
-  },
-  {
-    id: 'endgame-001',
-    category: '엔드게임 전술',
-    difficulty: '중급',
-    title: '패스 폰을 만드는 체크',
-    goal: '백 차례입니다. 오포지션으로 왕을 밀어내고 폰 전진을 보장하는 계획을 찾으세요.',
-    fen: '8/8/8/4k3/4P3/8/4K3/8 w - - 0 1',
-    answer: ['1. Ke3! keeps opposition.', 'If 1... Kf6 2. Kf4 and White supports the passer.'],
-    note: '엔드게임에서도 전술의 핵심은 템포입니다. 체크와 오포지션으로 상대 왕을 밀어냅니다.'
+    id: 'mate-in-1-010',
+    category: '메이트 인 1',
+    difficulty: '초급',
+    title: '메이트 인 1 - 10번',
+    goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
+    fen: 'r2B3k/5p1p/7N/8/8/b7/7P/K7 w - - 0 1',
+    answer: ['1. Bf6#'],
+    note: '비숍이 f6으로 이동해 h8 왕을 대각선으로 공격하고, h6 나이트가 g8 탈출 칸을 막습니다.'
   }
 ];
