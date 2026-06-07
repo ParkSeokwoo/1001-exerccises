@@ -1,0 +1,68 @@
+name: Apply board and navigation fixes
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Apply fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('src/app.js')
+          text = app.read_text(encoding='utf-8')
+          text = text.replace("import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate1';", "import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate2';")
+          text = text.replace("const nextPuzzle = document.querySelector('#next-puzzle');", "const previousPuzzle = document.querySelector('#previous-puzzle');\nconst nextPuzzle = document.querySelector('#next-puzzle');")
+          text = text.replace("fragment.append(createSquare('', rankIndex, fileIndex));", "fragment.append(createSquare('', '', rankIndex, fileIndex));")
+          text = text.replace("fragment.append(createSquare(pieceGlyphs[token], rankIndex, fileIndex));", "fragment.append(createSquare(pieceGlyphs[token], token, rankIndex, fileIndex));")
+          text = text.replace("function createSquare(piece, rankIndex, fileIndex) {", "function createSquare(piece, token, rankIndex, fileIndex) {")
+          text = text.replace("pieceLabel.className = 'piece';", "pieceLabel.className = `piece ${token ? (token === token.toUpperCase() ? 'white-piece' : 'black-piece') : ''}`.trim();")
+          text = text.replace("nextPuzzle.disabled = true;", "previousPuzzle.disabled = true;\n  nextPuzzle.disabled = true;")
+          text = text.replace("nextPuzzle.disabled = false;", "previousPuzzle.disabled = false;\n  nextPuzzle.disabled = false;")
+          text = text.replace("function moveToNextPuzzle() {", "function moveToPreviousPuzzle() {\n  const visiblePuzzles = getVisiblePuzzles();\n  if (visiblePuzzles.length === 0) {\n    renderPuzzle();\n    return;\n  }\n\n  currentIndex = (currentIndex - 1 + visiblePuzzles.length) % visiblePuzzles.length;\n  renderPuzzle();\n}\n\nfunction moveToNextPuzzle() {")
+          text = text.replace("nextPuzzle.addEventListener('click', moveToNextPuzzle);", "previousPuzzle.addEventListener('click', moveToPreviousPuzzle);\nnextPuzzle.addEventListener('click', moveToNextPuzzle);")
+          app.write_text(text, encoding='utf-8')
+
+          html = Path('index.html')
+          text = html.read_text(encoding='utf-8')
+          text = text.replace('src/board.css?v=20260607-board1', 'src/board.css?v=20260607-board2')
+          text = text.replace('src/app.js?v=20260607-mate1', 'src/app.js?v=20260607-mate2')
+          text = text.replace('<button id="next-puzzle" type="button" class="secondary">다음 문제</button>', '<button id="previous-puzzle" type="button" class="secondary">이전 문제</button>\n              <button id="next-puzzle" type="button" class="secondary">다음 문제</button>')
+          html.write_text(text, encoding='utf-8')
+
+          puzzles = Path('src/puzzles.js')
+          text = puzzles.read_text(encoding='utf-8')
+          text = text.replace("difficulty: '확인 필요',", "difficulty: '초급',", 1)
+          text = text.replace("fen: '1k1r4/1bnr4/3P1p2/6p1/7p/8/6PP/RR5K w - - 0 1',", "fen: '1k1r4/1bNr4/3P1p2/6p1/7p/8/6PP/RR5K w - - 0 1',")
+          text = text.replace("answer: ['FEN 확인 필요: 현재 입력된 위치에서는 명확한 1수 메이트 수가 보이지 않습니다.'],", "answer: ['1. Na6#'],")
+          text = text.replace("note: '가능성이 있어 보이는 체크 수들은 흑 왕의 캡처나 방어가 남습니다. 원본 FEN을 다시 확인하세요.'", "note: 'c7 백 나이트가 a6으로 이동해 b8 왕을 체크메이트합니다.'")
+          puzzles.write_text(text, encoding='utf-8')
+
+          board = Path('src/board.css')
+          text = board.read_text(encoding='utf-8')
+          text = text.replace(".piece {\n  display: block;\n  max-width: 100%;\n  font-size: clamp(1.75rem, 9cqw, 3.35rem);\n  line-height: 1;\n  transform: translateY(-0.02em);\n}", ".piece {\n  display: block;\n  max-width: 100%;\n  font-size: clamp(1.75rem, 9cqw, 3.35rem);\n  line-height: 1;\n  transform: translateY(-0.02em);\n}\n\n.piece.white-piece {\n  color: #f8fafc;\n  -webkit-text-stroke: 1.1px #050814;\n  paint-order: stroke fill;\n  text-shadow: 0 1px 0 #050814, 0 0 4px rgba(5, 8, 20, 0.78);\n}\n\n.piece.black-piece {\n  color: #020617;\n  -webkit-text-stroke: 0.75px #dbe6f6;\n  paint-order: stroke fill;\n  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 3px rgba(255, 255, 255, 0.35);\n}")
+          board.write_text(text, encoding='utf-8')
+
+          Path('.github/workflows/apply-board-and-nav-fixes.yml').unlink(missing_ok=True)
+          Path('.github/apply-fixes-trigger').unlink(missing_ok=True)
+          PY
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/app.js src/puzzles.js src/board.css .github/workflows/apply-board-and-nav-fixes.yml .github/apply-fixes-trigger
+          git commit -m "Fix board contrast and add previous puzzle navigation"
+          git push
