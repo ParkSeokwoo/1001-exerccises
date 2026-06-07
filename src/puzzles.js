@@ -42,12 +42,12 @@ export const puzzles = [
   {
     id: 'mate-in-1-005',
     category: '메이트 인 1',
-    difficulty: '확인 필요',
+    difficulty: '초급',
     title: '메이트 인 1 - 5번',
     goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
-    fen: '1k1r4/1bnr4/3P1p2/6p1/7p/8/6PP/RR5K w - - 0 1',
-    answer: ['FEN 확인 필요: 현재 입력된 위치에서는 명확한 1수 메이트 수가 보이지 않습니다.'],
-    note: '가능성이 있어 보이는 체크 수들은 흑 왕의 캡처나 방어가 남습니다. 원본 FEN을 다시 확인하세요.'
+    fen: '1k1r4/1bNr4/3P1p2/6p1/7p/8/6PP/RR5K w - - 0 1',
+    answer: ['1. Na6#'],
+    note: 'c7 백 나이트가 a6으로 이동해 b8 왕을 체크메이트합니다.'
   },
   {
     id: 'mate-in-1-006',

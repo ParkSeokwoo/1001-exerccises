@@ -1,4 +1,4 @@
-import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate1';
+import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate2';
 
 const pieceGlyphs = {
   K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙',
@@ -38,6 +38,7 @@ const showAnswer = document.querySelector('#show-answer');
 const markFirstTry = document.querySelector('#mark-first-try');
 const markReview = document.querySelector('#mark-review');
 const resetCurrent = document.querySelector('#reset-current');
+const previousPuzzle = document.querySelector('#previous-puzzle');
 const nextPuzzle = document.querySelector('#next-puzzle');
 const analysisLink = document.querySelector('#analysis-link');
 const solvedCount = document.querySelector('#solved-count');
@@ -212,11 +213,11 @@ function renderBoard(fen) {
       if (/\d/.test(token)) {
         const emptyCount = Number(token);
         for (let i = 0; i < emptyCount; i += 1) {
-          fragment.append(createSquare('', rankIndex, fileIndex));
+          fragment.append(createSquare('', '', rankIndex, fileIndex));
           fileIndex += 1;
         }
       } else {
-        fragment.append(createSquare(pieceGlyphs[token], rankIndex, fileIndex));
+        fragment.append(createSquare(pieceGlyphs[token], token, rankIndex, fileIndex));
         fileIndex += 1;
       }
     }
@@ -225,7 +226,7 @@ function renderBoard(fen) {
   board.replaceChildren(fragment);
 }
 
-function createSquare(piece, rankIndex, fileIndex) {
+function createSquare(piece, token, rankIndex, fileIndex) {
   const square = document.createElement('div');
   const isLight = (rankIndex + fileIndex) % 2 === 0;
   const file = String.fromCharCode(97 + fileIndex);
@@ -236,7 +237,7 @@ function createSquare(piece, rankIndex, fileIndex) {
   square.setAttribute('aria-label', label);
 
   const pieceLabel = document.createElement('span');
-  pieceLabel.className = 'piece';
+  pieceLabel.className = `piece ${token ? (token === token.toUpperCase() ? 'white-piece' : 'black-piece') : ''}`.trim();
   pieceLabel.textContent = piece;
 
   const coordinate = document.createElement('small');
@@ -264,6 +265,7 @@ function renderEmptyReviewState() {
   markFirstTry.disabled = true;
   markReview.disabled = true;
   resetCurrent.disabled = true;
+  previousPuzzle.disabled = true;
   nextPuzzle.disabled = true;
 }
 
@@ -294,6 +296,7 @@ function renderPuzzle() {
   markFirstTry.disabled = false;
   markReview.disabled = false;
   resetCurrent.disabled = false;
+  previousPuzzle.disabled = false;
   nextPuzzle.disabled = false;
   showAnswer.textContent = '답안 보기';
   answerWasViewed = false;
@@ -360,6 +363,17 @@ function markCurrentPuzzleForReview() {
     needsReview: true,
     lastSolvedAt: record.lastSolvedAt
   });
+  renderPuzzle();
+}
+
+function moveToPreviousPuzzle() {
+  const visiblePuzzles = getVisiblePuzzles();
+  if (visiblePuzzles.length === 0) {
+    renderPuzzle();
+    return;
+  }
+
+  currentIndex = (currentIndex - 1 + visiblePuzzles.length) % visiblePuzzles.length;
   renderPuzzle();
 }
 
@@ -628,6 +642,7 @@ markFirstTry.addEventListener('click', () => {
 
 markReview.addEventListener('click', markCurrentPuzzleForReview);
 resetCurrent.addEventListener('click', resetCurrentPuzzleRecord);
+previousPuzzle.addEventListener('click', moveToPreviousPuzzle);
 nextPuzzle.addEventListener('click', moveToNextPuzzle);
 
 resetStats.addEventListener('click', () => {
