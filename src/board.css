@@ -1,3 +1,4 @@
+/* cache-bust: 20260607-deploy3 */
 .board {
   container-type: inline-size;
   grid-template-columns: repeat(8, minmax(0, 1fr));
