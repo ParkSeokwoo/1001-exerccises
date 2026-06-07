@@ -1,4 +1,4 @@
-import { puzzles } from './puzzles.js';
+import { puzzles as defaultPuzzles } from './puzzles.js';
 
 const pieceGlyphs = {
   K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙',
@@ -6,10 +6,17 @@ const pieceGlyphs = {
 };
 
 const STORAGE_KEY = 'chess-tactics-study-records-v1';
+const CUSTOM_PUZZLES_KEY = 'chess-tactics-custom-puzzles-v1';
 const REVIEW_CATEGORY = '복습 문제';
+const ALL_CATEGORY = '전체';
+const fenPattern = /^([pnbrqkPNBRQK1-8]+\/){7}[pnbrqkPNBRQK1-8]+\s[wb]\s(-|K?Q?k?q?)\s(-|[a-h][36])\s\d+\s\d+$/;
 
 const categorySelect = document.querySelector('#category-select');
 const resetCategory = document.querySelector('#reset-category');
+const puzzleImport = document.querySelector('#puzzle-import');
+const restoreDefaultPuzzles = document.querySelector('#restore-default-puzzles');
+const downloadSampleJson = document.querySelector('#download-sample-json');
+const importStatus = document.querySelector('#import-status');
 const studyTab = document.querySelector('#study-tab');
 const summaryTab = document.querySelector('#summary-tab');
 const reviewTab = document.querySelector('#review-tab');
@@ -42,7 +49,8 @@ const topicRates = document.querySelector('#topic-rates');
 const resetStats = document.querySelector('#reset-stats');
 const startReviewSession = document.querySelector('#start-review-session');
 
-const categories = ['전체', ...new Set(puzzles.map((puzzle) => puzzle.category))];
+let activePuzzles = loadCustomPuzzles() ?? defaultPuzzles;
+let categories = buildCategories(activePuzzles);
 let currentCategory = categories[0];
 let currentIndex = 0;
 let answerWasViewed = false;
@@ -65,6 +73,35 @@ function saveStudyRecords() {
   }
 }
 
+function loadCustomPuzzles() {
+  try {
+    const storedPuzzles = localStorage.getItem(CUSTOM_PUZZLES_KEY);
+    return storedPuzzles ? normalizePuzzleData(JSON.parse(storedPuzzles)) : null;
+  } catch {
+    localStorage.removeItem(CUSTOM_PUZZLES_KEY);
+    return null;
+  }
+}
+
+function saveCustomPuzzles(nextPuzzles) {
+  localStorage.setItem(CUSTOM_PUZZLES_KEY, JSON.stringify(nextPuzzles));
+}
+
+function buildCategories(puzzleSet) {
+  return [ALL_CATEGORY, ...new Set(puzzleSet.map((puzzle) => puzzle.category))];
+}
+
+function usingCustomPuzzles() {
+  return localStorage.getItem(CUSTOM_PUZZLES_KEY) !== null;
+}
+
+function updateImportStatus(message = null, isError = false) {
+  const source = usingCustomPuzzles() ? `개인 JSON ${activePuzzles.length}문제 사용 중` : `기본 샘플 ${defaultPuzzles.length}문제 사용 중`;
+  importStatus.textContent = message ?? source;
+  importStatus.classList.toggle('error', isError);
+  restoreDefaultPuzzles.disabled = !usingCustomPuzzles();
+}
+
 function getRecord(puzzleId) {
   return studyRecords[puzzleId] ?? {
     attempts: 0,
@@ -82,12 +119,12 @@ function setRecord(puzzleId, record) {
 
 function getVisiblePuzzles() {
   if (currentCategory === REVIEW_CATEGORY) {
-    return puzzles.filter((puzzle) => getRecord(puzzle.id).needsReview);
+    return activePuzzles.filter((puzzle) => getRecord(puzzle.id).needsReview);
   }
 
-  return currentCategory === '전체'
-    ? puzzles
-    : puzzles.filter((puzzle) => puzzle.category === currentCategory);
+  return currentCategory === ALL_CATEGORY
+    ? activePuzzles
+    : activePuzzles.filter((puzzle) => puzzle.category === currentCategory);
 }
 
 function getCurrentPuzzle() {
@@ -117,9 +154,13 @@ function formatDate(dateString) {
 }
 
 function renderCategoryOptions() {
-  categorySelect.innerHTML = categories
-    .map((category) => `<option value="${category}">${category}</option>`)
-    .join('');
+  categorySelect.replaceChildren();
+  categories.forEach((category) => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    categorySelect.append(option);
+  });
 }
 
 function selectCategoryOption(category) {
@@ -131,6 +172,17 @@ function selectCategoryOption(category) {
   }
 
   categorySelect.value = category;
+}
+
+function refreshPuzzleSet(nextPuzzles) {
+  activePuzzles = nextPuzzles;
+  categories = buildCategories(activePuzzles);
+  currentCategory = categories[0];
+  currentIndex = 0;
+  answerWasViewed = false;
+  renderCategoryOptions();
+  renderPuzzle();
+  updateImportStatus();
 }
 
 function showView(viewName) {
@@ -152,7 +204,7 @@ function showView(viewName) {
 
 function renderBoard(fen) {
   const [placement] = fen.split(' ');
-  const squares = [];
+  const fragment = document.createDocumentFragment();
 
   placement.split('/').forEach((rank, rankIndex) => {
     let fileIndex = 0;
@@ -160,32 +212,45 @@ function renderBoard(fen) {
       if (/\d/.test(token)) {
         const emptyCount = Number(token);
         for (let i = 0; i < emptyCount; i += 1) {
-          squares.push(createSquare('', rankIndex, fileIndex));
+          fragment.append(createSquare('', rankIndex, fileIndex));
           fileIndex += 1;
         }
       } else {
-        squares.push(createSquare(pieceGlyphs[token], rankIndex, fileIndex));
+        fragment.append(createSquare(pieceGlyphs[token], rankIndex, fileIndex));
         fileIndex += 1;
       }
     }
   });
 
-  board.innerHTML = squares.join('');
+  board.replaceChildren(fragment);
 }
 
 function createSquare(piece, rankIndex, fileIndex) {
+  const square = document.createElement('div');
   const isLight = (rankIndex + fileIndex) % 2 === 0;
   const file = String.fromCharCode(97 + fileIndex);
   const rank = 8 - rankIndex;
   const label = `${file}${rank}`;
-  return `<div class="square ${isLight ? 'light' : 'dark'}" aria-label="${label}">
-    <span class="piece">${piece}</span>
-    <small>${label}</small>
-  </div>`;
+
+  square.className = `square ${isLight ? 'light' : 'dark'}`;
+  square.setAttribute('aria-label', label);
+
+  const pieceLabel = document.createElement('span');
+  pieceLabel.className = 'piece';
+  pieceLabel.textContent = piece;
+
+  const coordinate = document.createElement('small');
+  coordinate.textContent = label;
+
+  square.append(pieceLabel, coordinate);
+  return square;
 }
 
 function renderEmptyReviewState() {
-  board.innerHTML = '<div class="empty-board-message">복습할 문제가 없습니다</div>';
+  const emptyMessage = document.createElement('div');
+  emptyMessage.className = 'empty-board-message';
+  emptyMessage.textContent = '복습할 문제가 없습니다';
+  board.replaceChildren(emptyMessage);
   progressCount.textContent = '0 / 0';
   sideToMove.textContent = '복습 필요로 저장한 문제가 여기에 모입니다.';
   puzzleCategory.textContent = REVIEW_CATEGORY;
@@ -232,9 +297,18 @@ function renderPuzzle() {
   nextPuzzle.disabled = false;
   showAnswer.textContent = '답안 보기';
   answerWasViewed = false;
-  answerLines.innerHTML = puzzle.answer.map((line) => `<li>${line}</li>`).join('');
+  renderAnswerLines(puzzle.answer);
   answerNote.textContent = puzzle.note;
   renderDashboard();
+}
+
+function renderAnswerLines(lines) {
+  answerLines.replaceChildren();
+  lines.forEach((line) => {
+    const item = document.createElement('li');
+    item.textContent = line;
+    answerLines.append(item);
+  });
 }
 
 function recordPuzzleResult({ solvedFirstTry }) {
@@ -301,7 +375,7 @@ function moveToNextPuzzle() {
 }
 
 function openPuzzleById(puzzleId, targetCategory = null) {
-  const puzzle = puzzles.find((candidate) => candidate.id === puzzleId);
+  const puzzle = activePuzzles.find((candidate) => candidate.id === puzzleId);
   if (!puzzle) {
     return;
   }
@@ -318,15 +392,15 @@ function openPuzzleById(puzzleId, targetCategory = null) {
 function renderDashboard() {
   const records = Object.entries(studyRecords);
   const solvedRecords = records.filter(([, record]) => record.solved);
-  const solvedPuzzles = puzzles.filter((puzzle) => getRecord(puzzle.id).solved);
-  const reviewPuzzles = puzzles.filter((puzzle) => getRecord(puzzle.id).needsReview);
+  const solvedPuzzles = activePuzzles.filter((puzzle) => getRecord(puzzle.id).solved);
+  const reviewPuzzles = activePuzzles.filter((puzzle) => getRecord(puzzle.id).needsReview);
   const lastSolvedAt = solvedRecords
     .map(([, record]) => record.lastSolvedAt)
     .filter(Boolean)
     .sort()
     .at(-1);
 
-  solvedCount.textContent = `${solvedPuzzles.length} / ${puzzles.length}`;
+  solvedCount.textContent = `${solvedPuzzles.length} / ${activePuzzles.length}`;
   recentSolvedDate.textContent = formatDate(lastSolvedAt);
   reviewCount.textContent = reviewPuzzles.length;
   startReviewSession.disabled = reviewPuzzles.length === 0;
@@ -354,7 +428,7 @@ function renderReviewList(reviewPuzzles) {
 }
 
 function renderNumberedPuzzleList({ container, puzzlesToRender, emptyText, targetCategory }) {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   if (puzzlesToRender.length === 0) {
     const emptyMessage = document.createElement('p');
@@ -366,7 +440,7 @@ function renderNumberedPuzzleList({ container, puzzlesToRender, emptyText, targe
 
   puzzlesToRender.forEach((puzzle) => {
     const record = getRecord(puzzle.id);
-    const originalNumber = puzzles.findIndex((candidate) => candidate.id === puzzle.id) + 1;
+    const originalNumber = activePuzzles.findIndex((candidate) => candidate.id === puzzle.id) + 1;
     const item = document.createElement('button');
     item.type = 'button';
     item.className = 'numbered-puzzle-item';
@@ -389,10 +463,10 @@ function renderNumberedPuzzleList({ container, puzzlesToRender, emptyText, targe
 }
 
 function renderTopicRates() {
-  topicRates.innerHTML = '';
+  topicRates.replaceChildren();
 
-  [...new Set(puzzles.map((puzzle) => puzzle.category))].forEach((category) => {
-    const categoryPuzzles = puzzles.filter((puzzle) => puzzle.category === category);
+  [...new Set(activePuzzles.map((puzzle) => puzzle.category))].forEach((category) => {
+    const categoryPuzzles = activePuzzles.filter((puzzle) => puzzle.category === category);
     const attempts = categoryPuzzles.reduce((sum, puzzle) => sum + getRecord(puzzle.id).attempts, 0);
     const firstTrySolves = categoryPuzzles.reduce((sum, puzzle) => sum + getRecord(puzzle.id).firstTrySolves, 0);
     const rate = attempts === 0 ? 0 : Math.round((firstTrySolves / attempts) * 100);
@@ -407,7 +481,11 @@ function renderTopicRates() {
 
     const label = document.createElement('div');
     label.className = 'topic-rate-label';
-    label.innerHTML = `<strong>${category}</strong><span>${firstTrySolves}/${attempts} 성공 · 최근 ${formatDate(latestSolvedAt)}</span>`;
+    const categoryName = document.createElement('strong');
+    categoryName.textContent = category;
+    const detail = document.createElement('span');
+    detail.textContent = `${firstTrySolves}/${attempts} 성공 · 최근 ${formatDate(latestSolvedAt)}`;
+    label.append(categoryName, detail);
 
     const meter = document.createElement('div');
     meter.className = 'topic-meter';
@@ -423,6 +501,83 @@ function renderTopicRates() {
   });
 }
 
+function validateFen(fen) {
+  if (!fenPattern.test(fen)) {
+    return false;
+  }
+
+  const ranks = fen.split(' ')[0].split('/');
+  return ranks.every((rank) => {
+    const width = [...rank].reduce((sum, token) => sum + (/\d/.test(token) ? Number(token) : 1), 0);
+    return width === 8;
+  });
+}
+
+function normalizePuzzleData(rawData) {
+  const rawPuzzles = Array.isArray(rawData) ? rawData : rawData?.puzzles;
+  if (!Array.isArray(rawPuzzles) || rawPuzzles.length === 0) {
+    throw new Error('JSON은 퍼즐 배열이거나 { "puzzles": [...] } 형식이어야 합니다.');
+  }
+
+  const ids = new Set();
+  return rawPuzzles.map((puzzle, index) => {
+    const normalized = {
+      id: String(puzzle.id ?? `custom-${index + 1}`).trim(),
+      category: String(puzzle.category ?? '개인 문제').trim(),
+      difficulty: String(puzzle.difficulty ?? '개인').trim(),
+      title: String(puzzle.title ?? `문제 ${index + 1}`).trim(),
+      goal: String(puzzle.goal ?? '최선의 수를 찾으세요.').trim(),
+      fen: String(puzzle.fen ?? '').trim(),
+      answer: Array.isArray(puzzle.answer) ? puzzle.answer.map((line) => String(line)) : [],
+      note: String(puzzle.note ?? '').trim()
+    };
+
+    for (const field of ['id', 'category', 'difficulty', 'title', 'goal', 'fen', 'note']) {
+      if (!normalized[field]) {
+        throw new Error(`${index + 1}번 문제에 ${field} 값이 없습니다.`);
+      }
+    }
+
+    if (ids.has(normalized.id)) {
+      throw new Error(`중복된 id가 있습니다: ${normalized.id}`);
+    }
+    ids.add(normalized.id);
+
+    if (!validateFen(normalized.fen)) {
+      throw new Error(`${normalized.id}의 FEN 형식이 올바르지 않습니다.`);
+    }
+
+    if (normalized.answer.length === 0 || normalized.answer.some((line) => !line.trim())) {
+      throw new Error(`${normalized.id}에는 비어 있지 않은 answer 배열이 필요합니다.`);
+    }
+
+    return normalized;
+  });
+}
+
+async function importPuzzleJson(file) {
+  const text = await file.text();
+  const nextPuzzles = normalizePuzzleData(JSON.parse(text));
+  saveCustomPuzzles(nextPuzzles);
+  refreshPuzzleSet(nextPuzzles);
+  updateImportStatus(`${file.name}에서 ${nextPuzzles.length}문제를 불러왔습니다.`);
+}
+
+function downloadSamplePuzzleJson() {
+  const sample = {
+    puzzles: defaultPuzzles.slice(0, 2)
+  };
+  const blob = new Blob([JSON.stringify(sample, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'puzzles-sample.json';
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 categorySelect.addEventListener('change', (event) => {
   currentCategory = event.target.value;
   currentIndex = 0;
@@ -431,13 +586,35 @@ categorySelect.addEventListener('change', (event) => {
 
 resetCategory.addEventListener('click', () => {
   if (currentCategory === REVIEW_CATEGORY) {
-    currentCategory = '전체';
+    currentCategory = ALL_CATEGORY;
     selectCategoryOption(currentCategory);
   }
 
   currentIndex = 0;
   renderPuzzle();
 });
+
+puzzleImport.addEventListener('change', async (event) => {
+  const [file] = event.target.files;
+  if (!file) {
+    return;
+  }
+
+  try {
+    await importPuzzleJson(file);
+  } catch (error) {
+    updateImportStatus(error.message, true);
+  } finally {
+    puzzleImport.value = '';
+  }
+});
+
+restoreDefaultPuzzles.addEventListener('click', () => {
+  localStorage.removeItem(CUSTOM_PUZZLES_KEY);
+  refreshPuzzleSet(defaultPuzzles);
+});
+
+downloadSampleJson.addEventListener('click', downloadSamplePuzzleJson);
 
 showAnswer.addEventListener('click', () => {
   answerPanel.hidden = !answerPanel.hidden;
@@ -476,3 +653,4 @@ startReviewSession.addEventListener('click', () => {
 renderCategoryOptions();
 renderPuzzle();
 showView('study');
+updateImportStatus();
