@@ -1,0 +1,39 @@
+.board {
+  container-type: inline-size;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+}
+
+.square {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.piece {
+  display: block;
+  max-width: 100%;
+  font-size: clamp(1.75rem, 9cqw, 3.35rem);
+  line-height: 1;
+  transform: translateY(-0.02em);
+}
+
+.square small {
+  right: 0.18rem;
+  bottom: 0.12rem;
+  max-width: 45%;
+  overflow: hidden;
+  font-size: clamp(0.48rem, 1.65cqw, 0.66rem);
+  line-height: 1;
+  opacity: 0.82;
+}
+
+@media (max-width: 520px) {
+  .piece {
+    font-size: clamp(1.35rem, 8.5cqw, 2.65rem);
+  }
+
+  .square small {
+    font-size: clamp(0.42rem, 1.45cqw, 0.58rem);
+  }
+}
