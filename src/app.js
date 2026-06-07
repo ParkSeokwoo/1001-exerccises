@@ -1,4 +1,4 @@
-import { puzzles as defaultPuzzles } from './puzzles.js';
+import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate1';
 
 const pieceGlyphs = {
   K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙',
@@ -6,7 +6,7 @@ const pieceGlyphs = {
 };
 
 const STORAGE_KEY = 'chess-tactics-study-records-v1';
-const CUSTOM_PUZZLES_KEY = 'chess-tactics-custom-puzzles-v1';
+const CUSTOM_PUZZLES_KEY = 'chess-tactics-custom-puzzles-v2';
 const REVIEW_CATEGORY = '복습 문제';
 const ALL_CATEGORY = '전체';
 const fenPattern = /^([pnbrqkPNBRQK1-8]+\/){7}[pnbrqkPNBRQK1-8]+\s[wb]\s(-|K?Q?k?q?)\s(-|[a-h][36])\s\d+\s\d+$/;
