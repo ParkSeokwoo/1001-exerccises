@@ -1,0 +1,110 @@
+name: Apply piece design update
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/piece-design-trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update piece rendering and cache versions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('src/app.js')
+          text = app.read_text(encoding='utf-8')
+          text = text.replace("import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate2';", "import { puzzles as defaultPuzzles } from './puzzles.js?v=20260607-mate3';")
+          text = text.replace("""const pieceGlyphs = {
+  K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙',
+  k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟'
+};""", """const pieceGlyphs = {
+  K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟',
+  k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟'
+};""")
+          app.write_text(text, encoding='utf-8')
+
+          css = Path('src/board.css')
+          css.write_text("""/* cache-bust: 20260607-pieces1 */
+.board {
+  container-type: inline-size;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+}
+
+.square {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.piece {
+  display: block;
+  max-width: 100%;
+  font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
+  font-size: clamp(1.95rem, 9.4cqw, 3.55rem);
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(-0.025em);
+}
+
+.piece.white-piece {
+  color: #ffffff;
+  -webkit-text-stroke: 0.9px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+}
+
+.piece.black-piece {
+  color: #000000;
+  -webkit-text-stroke: 0.9px #000000;
+  paint-order: stroke fill;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.34);
+}
+
+.square small {
+  right: 0.18rem;
+  bottom: 0.12rem;
+  max-width: 45%;
+  overflow: hidden;
+  font-size: clamp(0.48rem, 1.65cqw, 0.66rem);
+  line-height: 1;
+  opacity: 0.78;
+}
+
+@media (max-width: 520px) {
+  .piece {
+    font-size: clamp(1.45rem, 8.8cqw, 2.78rem);
+  }
+
+  .square small {
+    font-size: clamp(0.42rem, 1.45cqw, 0.58rem);
+  }
+}
+""", encoding='utf-8')
+
+          html = Path('index.html')
+          text = html.read_text(encoding='utf-8')
+          text = text.replace('src/board.css?v=20260607-board2', 'src/board.css?v=20260607-pieces1')
+          text = text.replace('src/app.js?v=20260607-mate2', 'src/app.js?v=20260607-mate3')
+          html.write_text(text, encoding='utf-8')
+
+          Path('.github/workflows/apply-piece-design.yml').unlink(missing_ok=True)
+          Path('.github/piece-design-trigger').unlink(missing_ok=True)
+          PY
+      - name: Commit update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app.js src/board.css index.html .github/workflows/apply-piece-design.yml .github/piece-design-trigger
+          git commit -m "Use solid monochrome chess pieces"
+          git push
