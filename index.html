@@ -30,10 +30,20 @@
       </nav>
 
       <section id="study-view" class="app-view">
-        <section class="controls" aria-label="문제 분류 선택">
-          <label for="category-select">분류</label>
-          <select id="category-select"></select>
-          <button id="reset-category" type="button" class="secondary">처음 문제로</button>
+        <section class="controls" aria-label="문제 분류와 개인 문제 관리">
+          <div class="category-controls">
+            <label for="category-select">분류</label>
+            <select id="category-select"></select>
+            <button id="reset-category" type="button" class="secondary">처음 문제로</button>
+          </div>
+
+          <div class="import-controls" aria-label="개인 문제 JSON 관리">
+            <input id="puzzle-import" type="file" accept="application/json,.json" />
+            <label for="puzzle-import" class="file-button">개인 JSON 불러오기</label>
+            <button id="download-sample-json" type="button" class="secondary">샘플 JSON 저장</button>
+            <button id="restore-default-puzzles" type="button" class="secondary">기본 문제로 복원</button>
+            <p id="import-status" class="import-status" aria-live="polite"></p>
+          </div>
         </section>
 
         <section class="trainer-grid">
