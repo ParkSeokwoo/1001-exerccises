@@ -46,8 +46,8 @@ export const puzzles = [
     title: '메이트 인 1 - 5번',
     goal: '백 차례입니다. 흑 왕을 1수 만에 체크메이트하는 수를 찾으세요.',
     fen: '1k1r4/1bNr4/3P1p2/6p1/7p/8/6PP/RR5K w - - 0 1',
-    answer: ['1. Na6#'],
-    note: 'c7 백 나이트가 a6으로 이동해 b8 왕을 체크메이트합니다.'
+    answer: ['1. Ra8#'],
+    note: 'a1 룩이 a8로 올라가 b8의 흑 왕을 체크메이트합니다.'
   },
   {
     id: 'mate-in-1-006',
